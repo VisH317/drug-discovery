@@ -59,4 +59,28 @@
 3. determines relationships in iterations based on proximity at each time step until final embedding reached
 4. Similar to 3 but based on sequential protein building
 5. wave function approximator function: throw into GCN or attention network
-6. 
+
+**Things to test now**
+1. Regional encoding + transformer with different types of attention
+2. Adding a region combining algorithm
+3. using tiered attention
+
+**Atom Features**
+ - Atomic number
+ - hybridization
+ - valence electrons
+
+**Bond features for regions**
+ - Bond length
+ - bond order
+ - magnetic data - nmr shielding
+ - natural bond orbital analysis
+
+**Global regional features**
+ - polarization
+ - electron density
+ - molecular energy (hartree-fock)
+ - regional chirality
+ - torsional/dihedral angles - rotation around a bond axis
+ - Resonance structures - ways to represent electron distribution in molecule using Lewis structures
+ - steric hindrance - repulsion between atoms or groups in proximity - USEFUL FOR BETWEEN REGIONS as well

@@ -63,7 +63,7 @@ class MultiQueryAttention(nn.Module):
 
         QK = torch.cat([torch.matmul(Q, key.transpose(0, 1)) / torch.sqrt(torch.Tensor(self.att_dim)) for Q in self.Qs], dim=1)
 
-        return self.O(QK)
+        return self.O(torch.matmul(QK, value))
     
 
 class GroupQueryAttention(nn.Module):
@@ -78,5 +78,18 @@ class GroupQueryAttention(nn.Module):
         Vs = torch.cat([mqa(input) for mqa in self.mqa], 1)
         return self.O(Vs)
 
+# created stacked group query attention, proximity based attention distribution + combination, multiple encoder combination architecture
 
 
+class TieredGroupAttentionTier(nn.Module):
+
+    def __init__(self, d_model: int, att_dim: int, num_queries: int, num_groups_first: int, num_groups_second: int):
+        self.mqa = nn.ModuleList([MultiQueryAttention(d_model, att_dim*2, num_queries) for _ in range(num_groups_first)]) # currently uniform layers for each, possibly decrease att_dim at each tier by /2?
+        self.mqa2 = nn.ModuleList([MultiQueryAttention(d_model, att_dim, num_queries) for _ in range(num_groups_second)]) # currently uniform layers for each, possibly decrease att_dim at each tier by /2?
+        self.O = nn.Linear(att_dim*num_groups_second, d_model)
+
+    def forward(self, input: Tensor) -> Tensor:
+        O1: List[Tensor] = [mqa(input) for mqa in self.mqa]
+        O2 = torch.cat([mqa(O1[ix]) for ix,mqa in enumerate(self.mqa2)])
+        return self.O(O2)
+    
