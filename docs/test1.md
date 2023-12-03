@@ -84,3 +84,18 @@
  - torsional/dihedral angles - rotation around a bond axis
  - Resonance structures - ways to represent electron distribution in molecule using Lewis structures
  - steric hindrance - repulsion between atoms or groups in proximity - USEFUL FOR BETWEEN REGIONS as well
+
+**Region Creation network**
+ - Get nearest atoms direct bonds - embed each atom and each bond's quantum representation
+ - Run a single internal convolution of message passing between the local area and convert the region using pooling with edges and information on other nodes, take the final middle node region as the embedding
+   - FUTURE: add the angle information as well
+ - end up with a bunch of atoms with regional encodings
+ - PAMNet - did local and all over global
+   - we can do this by throwing it into a transformer for better analaysis
+   - or have controlled encoders/attentions that first apply to local regions to create individual output embeddings
+     - This would work by selecting regions near each other at first, passing them through one attention pass for nearby
+     - Take the output of this attention and use in future attentions
+ - IMPORTANT: add psi4 molecule quantum information along the way at the end of each attention step
+ - OR: instead of regions - can have different encoders dedicated to different regions, then encoder values from all are combined
+ - OR: can have inner attention in ones, and then global cross attention in others
+   - different paradigms to encode at each encoder layer
