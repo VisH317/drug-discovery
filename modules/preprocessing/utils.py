@@ -1,6 +1,6 @@
 from torch_geometric.data import Data
 import torch
-from rdkit import Atom, Bond, Chem
+from rdkit import Atom, Bond, Chem, AllChem
 from data import x_map, e_map
 import psi4
 
@@ -83,6 +83,27 @@ def get_mol_info(mol):
 
 def smiles_to_graph(smiles: str):
     mol = Chem.MolFromSmiles(smiles)
+    mol = Chem.AddHs(mol)
+    AllChem.EmbedMolecule(mol)
+    AllChem.MMFFOptimizeMolecule(mol)
     x, edge_index, edge_attr = get_mol_info(mol)
 
     return Data(x=x, edge_index=edge_index, edge_attr=edge_attr, smiles=smiles)
+
+
+def mol_to_xyz(mol):
+    string = ""
+    string += f"{mol.GetNumAtoms()}\n\n"
+    for atom in mol.GetAtoms():
+        pos = mol.GetConformer().GetAtomPosition(atom.GetIdx())
+        string += f"{atom.GetSymbol()} {pos.x} {pos.y} {pos.z}\n"
+
+    return string
+
+
+def smiles_to_psi4(smiles: str):
+    mol = Chem.MolFromSmiles(smiles)
+    mol = Chem.AddHs(mol)
+    AllChem.EmbedMolecule(mol)
+    AllChem.MMFFOptimizeMolecule(mol)
+    return psi4.geometry(mol_to_xyz(mol))
