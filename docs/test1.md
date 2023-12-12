@@ -88,7 +88,7 @@
 **Region Creation network**
  - Get nearest atoms direct bonds - embed each atom and each bond's quantum representation
  - Run a single internal convolution of message passing between the local area and convert the region using pooling with edges and information on other nodes, take the final middle node region as the embedding
-   - FUTURE: add the angle information as well
+   - FUTURE: add the angle information as well + magnetic information
  - end up with a bunch of atoms with regional encodings
  - PAMNet - did local and all over global
    - we can do this by throwing it into a transformer for better analaysis
