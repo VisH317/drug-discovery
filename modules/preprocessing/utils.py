@@ -89,6 +89,7 @@ def smiles_to_graph(smiles: str):
     x, edge_index, edge_attr = get_mol_info(mol)
 
     return Data(x=x, edge_index=edge_index, edge_attr=edge_attr, smiles=smiles)
+    # d.edge_attrs()
 
 
 def mol_to_xyz(mol):
