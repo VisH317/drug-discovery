@@ -1,0 +1,7 @@
+name: drug-discovery-exp
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - libint==2.7.3dev1
+  - psi4==1.8

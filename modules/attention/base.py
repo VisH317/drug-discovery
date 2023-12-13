@@ -18,8 +18,8 @@ class AttentionHead(nn.Module):
 
     def forward(self, input: Tensor) -> Tensor:
         Q: Tensor = self.query(input)
-        K: Tensor = self.query(input)
-        V: Tensor = self.query(input)
+        K: Tensor = self.key(input)
+        V: Tensor = self.value(input)
 
         QK = torch.matmul(Q, K.transpose(0, 1)) / torch.sqrt(torch.Tensor(self.att_dim))
         score = F.softmax(QK)
