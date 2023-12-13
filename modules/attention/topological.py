@@ -26,6 +26,20 @@ def get_edge(m: Mole, data: Data):
     # we dont need this right? embedding takes in the nearest edges
 
 
-class Topological(nn.Module):
+class Topological():
     def __init__(self, m: Mole, psi, d_attn: int = 32):
+
+        self.m = m
+        self.psi = psi
+        self.d_attn = d_attn
+
+    def get_topological(self, start_ix: int, end_ix: int) -> float:
+        path: Tuple[int] = GetShortestPath(self.m, start_ix, end_ix)
+
+        # possibly computing length based on a combination of length and order
+        total_bond_length = 0
+
+        for i in range(len(path)-1):
+            total_bond_length += self.psi.bond_length(i, i+1)
         
+        return total_bond_length

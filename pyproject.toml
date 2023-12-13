@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "drug-discovery-exp"
+version = "0.1.0"
+description = ""
+authors = ["VisH317 <vt201916384@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+torch = "^2.1.1"
+torch-geometric = "^2.4.0"
+rdkit = "^2023.9.2"
+tqdm = "^4.66.1"
+numpy = "^1.26.2"
+pandas = "^2.1.4"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
