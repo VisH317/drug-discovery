@@ -11,9 +11,8 @@ class Preprocess():
     def __init__(self):
         self.gat = GATConv(-1, 64, 2, dropout=0.05, edge_dim=7)
     
-    def forward(self, smiles: str):
-        graph: Data = smiles_to_graph(smiles)
+    def forward(self, graph: Data, mol, psi):
         preprocessed = self.gat(graph.x, graph.edge_index, edge_attr=graph.edge_attr)
-        return graph.x
+        return preprocessed.x, mol, psi
     
 

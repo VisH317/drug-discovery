@@ -83,12 +83,13 @@ def get_mol_info(mol):
 
 def smiles_to_graph(smiles: str):
     mol = Chem.MolFromSmiles(smiles)
+    psi = smiles_to_psi4(smiles)
     mol = Chem.AddHs(mol)
     AllChem.EmbedMolecule(mol)
     AllChem.MMFFOptimizeMolecule(mol)
     x, edge_index, edge_attr = get_mol_info(mol)
 
-    return Data(x=x, edge_index=edge_index, edge_attr=edge_attr, smiles=smiles)
+    return Data(x=x, edge_index=edge_index, edge_attr=edge_attr, smiles=smiles), mol, psi
     # d.edge_attrs()
 
 

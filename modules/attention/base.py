@@ -26,6 +26,7 @@ class AttentionHead(nn.Module):
 
         return torch.matmul(score, V)
 
+# TODO: preprocess all topological values
 
 class MultiHeadAttention(nn.Module):
 
