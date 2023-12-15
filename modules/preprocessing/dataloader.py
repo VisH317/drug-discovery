@@ -3,12 +3,15 @@ from torch_geometric.data import Data
 from typing import Any, List
 from pydantic import BaseModel
 import torch
+from torch import Tensor
 from torch.utils.data import Dataset
 from.utils import smiles_to_graph
 from ..attention.topological import Topological
 
 
 FEATURES = ["NR-AR", "NR-AR-LBD", "NR-Aromatase", "NR-ER", "NR-ER-LBD", "SR-ARE", "SR-ATADS", "SR-HSE", "SR-MMP", "SR-p53"]
+
+nn
 
 class Mole(BaseModel):
     graph: Data

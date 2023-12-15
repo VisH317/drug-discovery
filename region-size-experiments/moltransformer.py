@@ -92,7 +92,7 @@ class MolTransformer(nn.Module):
     def forward(self, input: Datum) -> Tensor:
         init = self.initmod(input.graph)
         for encoder in self.encoders:
-            out = encoder(input.graph, input.mol, input.psi)
+            out = encoder(init, input.mol, input.psi)
         
         return out
         
