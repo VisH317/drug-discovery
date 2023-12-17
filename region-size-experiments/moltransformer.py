@@ -26,7 +26,8 @@ class TopologicalAttention(nn.Module):
         self.K = nn.Linear(d_model, d_attn)
         self.V = nn.Linear(d_model, d_attn)
 
-    def forward(self, input: Tensor, m, psi):
+    def forward(self, input: Tensor, top: Tensor):
+        # dim: batch, seq_len, d_model
         Q: Tensor = self.Q(input)
         K: Tensor = self.K(input)
         V: Tensor = self.V(input)

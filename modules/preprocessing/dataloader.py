@@ -1,6 +1,6 @@
 import pandas as pd
 from torch_geometric.data import Data
-from typing import Any, List
+from typing import Any, List, Dict
 from pydantic import BaseModel
 import torch
 from torch import Tensor
@@ -11,12 +11,8 @@ from ..attention.topological import Topological
 
 FEATURES = ["NR-AR", "NR-AR-LBD", "NR-Aromatase", "NR-ER", "NR-ER-LBD", "SR-ARE", "SR-ATADS", "SR-HSE", "SR-MMP", "SR-p53"]
 
-nn
-
 class Mole(BaseModel):
     graph: Data
-    mol: Any
-    psi: Any
     top: Tensor
     features: List[float]
 
@@ -30,14 +26,26 @@ class Tox21(Dataset):
         for ix in len(df):
             graph, mol, psi = smiles_to_graph(df["smiles"][ix])
             top = torch.empty((graph.x.size()[1], graph.x.size()[1], 16))
+            for atom1 in mol.GetAtoms():
+                for atom2 in mol.GetAtoms():
+                    x, y = atom1.GetIdx(), atom2.GetIdx()
+                    total, vec1: Tensor = Topological().get_topological(mol, psi, x, y)
+                    total, vec2: Tensor = Topological().get_topological(mol, psi, y, x)
+                    top[x][y] = vec1
+                    top[y][x] = vec2
+
             features: List[float] = []
             for feature in FEATURES:
                 try: features.append(df[feature][ix])
                 except: features.append(-1)
-            self.data.append(Mole(graph, mol, psi, top, features))
+            self.data.append(Mole(graph, top, features))
         
     def __len__(self):
         return len(self.data)
     
     def __getitem__(self, idx: int):
         return self.data[idx]
+    
+
+def collate(mols: List[Mole]):
+    

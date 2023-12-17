@@ -43,7 +43,7 @@ class Topological():
             bond_lengths.append(le)
             total_bond_length += le
 
-        fin_arr =[total_bond_length]
+        fin_arr = [total_bond_length] # TODO: try switching this to coords instead
 
         length = max(len(bond_lengths), 15)
 
