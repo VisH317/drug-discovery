@@ -5,7 +5,6 @@ from collections import namedtuple
 import torch
 from torch import nn, Tensor
 import torch.nn.functional as F
-from modules.attention.base import MultiHeadAttention
 from modules.attention.topological import Topological
 from modules.preprocessing.preprocess import Preprocess
 from modules.preprocessing.utils import smiles_to_graph

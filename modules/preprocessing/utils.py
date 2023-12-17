@@ -1,10 +1,11 @@
 from torch_geometric.data import Data
 import torch
-from rdkit import Atom, Bond, Chem, AllChem
-from data import x_map, e_map
+from rdkit import Chem
+from rdkit.Chem import AllChem
+from .data import x_map, e_map
 import psi4
 
-def get_atom_info(atom: Atom):
+def get_atom_info(atom):
     x = []
     x.append(x_map['atomic_num'].index(atom.GetAtomicNum()))
     x.append(x_map['chirality'].index(str(atom.GetChiralTag())))
@@ -17,7 +18,7 @@ def get_atom_info(atom: Atom):
     x.append(x_map['is_aromatic'].index(atom.GetIsAromatic()))
     x.append(x_map['is_in_ring'].index(atom.IsInRing()))
     
-def get_edge_info(bond: Bond, m):
+def get_edge_info(bond, m):
 
     idx1, idx2 = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
     atom1_coords = m.GetConformer().GetAtomPosition(idx1)

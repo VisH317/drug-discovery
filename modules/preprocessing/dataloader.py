@@ -1,8 +1,8 @@
 import pandas as pd
 from torch_geometric.data import Data
 from typing import Any, List, Dict
-from pydantic import BaseModel
 import torch
+from collections import namedtuple
 from torch import Tensor
 from torch.utils.data import Dataset
 from.utils import smiles_to_graph
@@ -11,10 +11,8 @@ from ..attention.topological import Topological
 
 FEATURES = ["NR-AR", "NR-AR-LBD", "NR-Aromatase", "NR-ER", "NR-ER-LBD", "SR-ARE", "SR-ATADS", "SR-HSE", "SR-MMP", "SR-p53"]
 
-class Mole(BaseModel):
-    graph: Data
-    top: Tensor
-    features: List[float]
+
+Mole = namedtuple("Mole", ['graph', 'top', 'features'])
 
 class Tox21(Dataset):
     def __init__(self):
@@ -29,8 +27,8 @@ class Tox21(Dataset):
             for atom1 in mol.GetAtoms():
                 for atom2 in mol.GetAtoms():
                     x, y = atom1.GetIdx(), atom2.GetIdx()
-                    total, vec1: Tensor = Topological().get_topological(mol, psi, x, y)
-                    total, vec2: Tensor = Topological().get_topological(mol, psi, y, x)
+                    total, vec1 = Topological().get_topological(mol, psi, x, y)
+                    total, vec2 = Topological().get_topological(mol, psi, y, x)
                     top[x][y] = vec1
                     top[y][x] = vec2
 

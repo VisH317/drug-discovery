@@ -1,4 +1,4 @@
-from .moltransformer import MolTransformer
+from regionsizeexperiments.moltransformer import MolTransformer
 from torch import nn, Tensor, optim
 from torch.utils.data import DataLoader, random_split
 from modules.preprocessing.dataloader import FEATURES, Tox21, tox21_collate
@@ -26,6 +26,7 @@ def train(model: nn.Module, dataset: Tox21):
 
         opt.zero_grad()
         
-    
-    
 
+model = MolTransformer(32, 2, 8, 16, 11, False)
+item = Tox21()[0]
+model.forward(item.graph, item.top)

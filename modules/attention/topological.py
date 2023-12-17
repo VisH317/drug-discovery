@@ -7,11 +7,10 @@ import torch
 from torch import nn, Tensor
 import rdkit
 from torch_geometric.data import Data
-from rdkit.Chem import Mole
 from rdkit.Chem.rdmolops import GetShortestPath
 from ..preprocessing.utils import mol_to_xyz
 
-def get_topological(m: Mole, psi, start_ix: int, end_ix: int):
+def get_topological(m, psi, start_ix: int, end_ix: int):
     path: Tuple[int] = GetShortestPath(m, start_ix, end_ix)
 
     # possibly computing length based on a combination of length and order
@@ -22,7 +21,7 @@ def get_topological(m: Mole, psi, start_ix: int, end_ix: int):
     
     return total_bond_length
 
-def get_edge(m: Mole, data: Data):
+def get_edge(m, data: Data):
     pass
     # we dont need this right? embedding takes in the nearest edges
 
@@ -31,7 +30,7 @@ class Topological():
     def __init__(self, d_attn: int = 32):
         self.d_attn = d_attn
 
-    def get_topological(self, m: Mole, psi, start_ix: int, end_ix: int) -> float:
+    def get_topological(self, m, psi, start_ix: int, end_ix: int) -> float:
         path: Tuple[int] = GetShortestPath(m, start_ix, end_ix)
 
         # possibly computing length based on a combination of length and order
