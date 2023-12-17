@@ -21,20 +21,20 @@ def get_atom_info(atom):
     return x
     
 
-def get_edge_info(bond, m):
+def get_edge_info(bond, m, psi):
 
     idx1, idx2 = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
     atom1_coords = m.GetConformer().GetAtomPosition(idx1)
     atom2_coords = m.GetConformer().GetAtomPosition(idx2)
 
-    # convert to psi4 molecule for quantum estimations
-    psi_bond = psi4.geometry(
-        f"""
-        2
-        {m.GetAtomWithIdx(idx1).GetSymbol()} {atom1_coords.x} {atom1_coords.y} {atom1_coords.z}
-        {m.GetAtomWithIdx(idx1).GetSymbol()} {atom2_coords.x} {atom2_coords.y} {atom2_coords.z}
-        """
-    )
+    # # convert to psi4 molecule for quantum estimations
+    # psi_bond = psi4.geometry(
+    #     f"""
+    #     2
+    #     {m.GetAtomWithIdx(idx1).GetSymbol()} {atom1_coords.x} {atom1_coords.y} {atom1_coords.z}
+    #     {m.GetAtomWithIdx(idx1).GetSymbol()} {atom2_coords.x} {atom2_coords.y} {atom2_coords.z}
+    #     """
+    # )
 
     # psi4.optimize('scf/cc-pvdz', molecule=psi_bond)
 
@@ -46,21 +46,22 @@ def get_edge_info(bond, m):
 
     # bond_length = psi_bond.bond_length(0, 1) # radial representation of the quantum number
     # TODO: angular representation requires a custom attention layer, I'll set this up later
-    psi4.set_options({'reference': 'uhf'})
-    energy, wavefunction = psi4.energy("scf/cc-pvdz", return_wfn=True, molecule=psi_bond)
+    # energy, wavefunction = psi4.energy("scf/cc-pvdz", return_wfn=True, molecule=psi_bond)
     # print("energy: ", energy)
     # print(wavefunction.__dict__)
     # exit()
     # bond_order = wavefunction.bond_order(0, 1) # bond type and strength, based on quantum calculations, but rdkit provides this info already
-    alpha, beta = wavefunction.nalpha(), wavefunction.nbeta()
+    # alpha, beta = wavefunction.nalpha(), wavefunction.nbeta()
     # oe_a, oe_b = wavefunction.epsilon_a_subset("A0"), wavefunction.epsilon_b_subset("AO") # we don't need these, these are eigenvalues - calculated on the hamiltonian to represent different energy states of the molecule
     # voe_a, voe_b = wavefunction.epsilon_a_subset("A0", "VIRTUAL"), wavefunction.epsilon_b_subset("AO", "VIRTUAL")
-    # nmr = psi4.nmr_shielding(psi_bond, atoms=[0,1]) # magnetic info, important because its one of the quantum numbers that aren't considered in the above (radial, angular, magnetic)
+    # nmr = psi4.nmr_shielding(psi, atoms=[idx1,idx2]) # magnetic info, important because its one of the quantum numbers that aren't considered in the above (radial, angular, magnetic)
+    # print("nmr: ", nmr)
+    # e.append(nmr)
     # TODO: ADD IN NMR LATER for magnetic information (it returns a 3x3 tensor per nucleus)
 
-    e.append(energy)
-    e.append(alpha)
-    e.append(beta)
+    # e.append(energy)
+    # e.append(alpha)
+    # e.append(beta)
 
     return [[idx1, idx2], [idx2, idx1]], [e, e]
 
@@ -76,16 +77,18 @@ def get_mol_info(mol):
     
     x = torch.tensor(atoms, dtype=torch.long).view(-1, 9)
 
+    psi = psi4.geometry(mol_to_xyz(mol))
+    # energy, wavefunction = psi4.energy("scf/cc-pvdz", return_wfn=True, molecule=psi)
     edge_indices, edge_attrs = [], []
 
     for bond in mol.GetBonds():
-        edge_idx, edge_attr = get_edge_info(bond, mol)
+        edge_idx, edge_attr = get_edge_info(bond, mol, psi)
         edge_indices += edge_idx
         edge_attrs += edge_attr
 
     edge_index = torch.tensor(edge_indices)
     edge_index = edge_index.t().to(torch.long).view(2, -1)
-    edge_attr = torch.tensor(edge_attrs, dtype=torch.long).view(-1, 7)
+    edge_attr = torch.tensor(edge_attrs, dtype=torch.long).view(-1, 4)
 
     if edge_index.numel() > 0:  # Sort indices.
         perm = (edge_index[0] * x.size(0) + edge_index[1]).argsort()

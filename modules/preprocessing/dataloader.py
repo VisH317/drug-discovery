@@ -24,13 +24,12 @@ class Tox21(Dataset):
         for ix in range(1): 
             print("self.dtata: ", self.data) # change this
             graph, mol, psi = smiles_to_graph(df["smiles"][10])
-            break
             top = torch.empty((graph.x.size()[1], graph.x.size()[1], 16))
             for atom1 in mol.GetAtoms():
                 for atom2 in mol.GetAtoms():
                     x, y = atom1.GetIdx(), atom2.GetIdx()
-                    total, vec1 = Topological().get_topological(mol, psi, x, y)
-                    total, vec2 = Topological().get_topological(mol, psi, y, x)
+                    vec1 = Topological().get_topological(mol, psi, x, y)
+                    vec2 = Topological().get_topological(mol, psi, y, x)
                     top[x][y] = vec1
                     top[y][x] = vec2
 

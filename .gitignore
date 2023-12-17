@@ -2,3 +2,5 @@ venv
 data/tox21/*.csv
 __pycache__
 **/__pycache__
+*.dat
+*.clean

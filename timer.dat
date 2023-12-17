@@ -941,3 +941,183 @@ HF: Form C                          :      0.183u      0.000s      0.076w    505
 HF: Form D                          :      0.000u      0.000s      0.001w    505 calls
 
 **************************************************************************************
+
+Host: DESKTOP-LU4DJEU
+
+Timers On : Sun Dec 17 17:47:09 2023
+Timers Off: Sun Dec 17 17:52:55 2023
+
+Wall Time:      346.02 seconds
+
+                                                       Time (seconds)
+Module                                       User      System        Wall        Calls
+DFH: sparsity prep                  :      3.433u      0.033s      2.089w      1 calls
+Libint2ERI::Libint2ERI              :      6.783u      0.033s      4.092w      4 calls
+JK: (A|Q)^-1                        :     23.767u      2.283s     14.314w      1 calls
+JK: (A|mn)                          :     38.917u      0.233s     23.387w     27 calls
+JK: (Q|mn)                          :     98.167u      0.033s     58.953w     27 calls
+JK: (Q|mn) Write                    :      0.133u      0.867s      1.470w     27 calls
+HF: Form core H                     :      3.233u      0.017s      1.943w      1 calls
+HF: Form S/X                        :      0.367u      0.000s      0.227w      1 calls
+HF: Guess                           :      0.167u      0.000s      0.106w      1 calls
+SAD Guess                           :      0.167u      0.000s      0.104w      1 calls
+HF: Form G                          :    384.200u      6.933s    234.685w     11 calls
+JK: D                               :      0.083u      0.000s      0.038w     11 calls
+JK: USO2AO                          :      0.000u      0.000s      0.000w     11 calls
+JK: JK                              :    384.067u      6.933s    234.631w     11 calls
+JK: (Q|mn) Read                     :      0.533u      4.517s      3.879w    259 calls
+JK: J                               :      4.033u      2.083s      3.076w    259 calls
+JK: J1                              :      1.767u      1.950s      1.405w    259 calls
+JK: J2                              :      1.983u      0.133s      1.382w    259 calls
+JK: K                               :    379.450u      0.333s    227.656w    259 calls
+JK: K1                              :    157.517u      0.333s     94.613w    259 calls
+JK: K2                              :    221.850u      0.000s    133.008w    259 calls
+JK: AO2USO                          :      0.000u      0.000s      0.000w     11 calls
+HF: Form F                          :      0.017u      0.000s      0.006w     11 calls
+HF: Form D                          :      0.017u      0.000s      0.037w     11 calls
+HF: DIIS                            :      1.167u      0.183s      0.804w     10 calls
+HF: Form C                          :      3.200u      0.000s      1.911w     10 calls
+
+--------------------------------------------------------------------------------------
+DFH: sparsity prep                  :      3.433u      0.033s      2.089w      1 calls
+| Libint2ERI::Libint2ERI            :      2.250u      0.033s      1.376w      1 calls
+Libint2ERI::Libint2ERI              :      4.533u      0.000s      2.716w      2 calls
+JK: (A|Q)^-1                        :     23.767u      2.283s     14.314w      1 calls
+| Libint2ERI::Libint2ERI            :      0.000u      0.000s      0.000w      1 calls
+JK: (A|mn)                          :     38.917u      0.233s     23.387w     27 calls
+JK: (Q|mn)                          :     98.167u      0.033s     58.953w     27 calls
+JK: (Q|mn) Write                    :      0.133u      0.867s      1.470w     27 calls
+HF: Form core H                     :      3.233u      0.017s      1.943w      1 calls
+HF: Form S/X                        :      0.367u      0.000s      0.227w      1 calls
+HF: Guess                           :      0.167u      0.000s      0.106w      1 calls
+| SAD Guess                         :      0.167u      0.000s      0.104w      1 calls
+HF: Form G                          :    384.200u      6.933s    234.685w     11 calls
+| JK: D                             :      0.083u      0.000s      0.038w     11 calls
+| JK: USO2AO                        :      0.000u      0.000s      0.000w     11 calls
+| JK: JK                            :    384.067u      6.933s    234.631w     11 calls
+| | JK: (Q|mn) Read                 :      0.533u      4.517s      3.879w    259 calls
+| | JK: J                           :      4.033u      2.083s      3.076w    259 calls
+| | | JK: J1                        :      1.767u      1.950s      1.405w    259 calls
+| | | JK: J2                        :      1.983u      0.133s      1.382w    259 calls
+| | JK: K                           :    379.450u      0.333s    227.656w    259 calls
+| | | JK: K1                        :    157.517u      0.333s     94.613w    259 calls
+| | | JK: K2                        :    221.850u      0.000s    133.008w    259 calls
+| JK: AO2USO                        :      0.000u      0.000s      0.000w     11 calls
+HF: Form F                          :      0.017u      0.000s      0.006w     11 calls
+HF: Form D                          :      0.017u      0.000s      0.037w     11 calls
+HF: DIIS                            :      1.167u      0.183s      0.804w     10 calls
+HF: Form C                          :      3.200u      0.000s      1.911w     10 calls
+
+**************************************************************************************
+
+Host: DESKTOP-LU4DJEU
+
+Timers On : Sun Dec 17 17:53:36 2023
+Timers Off: Sun Dec 17 17:53:37 2023
+
+Wall Time:        1.31 seconds
+
+                                                       Time (seconds)
+Module                                       User      System        Wall        Calls
+
+--------------------------------------------------------------------------------------
+
+**************************************************************************************
+
+Host: DESKTOP-LU4DJEU
+
+Timers On : Sun Dec 17 18:04:41 2023
+Timers Off: Sun Dec 17 18:04:42 2023
+
+Wall Time:        1.34 seconds
+
+                                                       Time (seconds)
+Module                                       User      System        Wall        Calls
+
+--------------------------------------------------------------------------------------
+
+**************************************************************************************
+
+Host: DESKTOP-LU4DJEU
+
+Timers On : Sun Dec 17 18:06:05 2023
+Timers Off: Sun Dec 17 18:06:07 2023
+
+Wall Time:        1.34 seconds
+
+                                                       Time (seconds)
+Module                                       User      System        Wall        Calls
+
+--------------------------------------------------------------------------------------
+
+**************************************************************************************
+
+Host: DESKTOP-LU4DJEU
+
+Timers On : Sun Dec 17 18:06:58 2023
+Timers Off: Sun Dec 17 18:06:59 2023
+
+Wall Time:        1.33 seconds
+
+                                                       Time (seconds)
+Module                                       User      System        Wall        Calls
+
+--------------------------------------------------------------------------------------
+
+**************************************************************************************
+
+Host: DESKTOP-LU4DJEU
+
+Timers On : Sun Dec 17 18:07:20 2023
+Timers Off: Sun Dec 17 18:07:21 2023
+
+Wall Time:        1.32 seconds
+
+                                                       Time (seconds)
+Module                                       User      System        Wall        Calls
+
+--------------------------------------------------------------------------------------
+
+**************************************************************************************
+
+Host: DESKTOP-LU4DJEU
+
+Timers On : Sun Dec 17 18:07:57 2023
+Timers Off: Sun Dec 17 18:07:58 2023
+
+Wall Time:        1.32 seconds
+
+                                                       Time (seconds)
+Module                                       User      System        Wall        Calls
+
+--------------------------------------------------------------------------------------
+
+**************************************************************************************
+
+Host: DESKTOP-LU4DJEU
+
+Timers On : Sun Dec 17 18:09:46 2023
+Timers Off: Sun Dec 17 18:09:47 2023
+
+Wall Time:        1.31 seconds
+
+                                                       Time (seconds)
+Module                                       User      System        Wall        Calls
+
+--------------------------------------------------------------------------------------
+
+**************************************************************************************
+
+Host: DESKTOP-LU4DJEU
+
+Timers On : Sun Dec 17 18:17:01 2023
+Timers Off: Sun Dec 17 18:17:02 2023
+
+Wall Time:        1.33 seconds
+
+                                                       Time (seconds)
+Module                                       User      System        Wall        Calls
+
+--------------------------------------------------------------------------------------
+
+**************************************************************************************

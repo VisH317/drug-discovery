@@ -5,7 +5,7 @@ from typing import Tuple
 import psi4
 import torch
 from torch import nn, Tensor
-import rdkit
+from rdkit.Chem import rdMolTransforms
 from torch_geometric.data import Data
 from rdkit.Chem.rdmolops import GetShortestPath
 from ..preprocessing.utils import mol_to_xyz
@@ -32,21 +32,22 @@ class Topological():
 
     def get_topological(self, m, psi, start_ix: int, end_ix: int) -> float:
         path: Tuple[int] = GetShortestPath(m, start_ix, end_ix)
+        # atom1_coords = m.GetConformer().GetAtomPosition(start_ix)
+        # atom2_coords = m.GetConformer().GetAtomPosition(end_ix)
 
         # possibly computing length based on a combination of length and order
-        total_bond_length = 0
         bond_lengths = []
+        conf = m.GetConformer()
 
         for i in range(len(path)-1):
-            le = psi.bond_length(i, i+1)
+            le = rdMolTransforms.GetBondLength(conf, i, i+1)
             bond_lengths.append(le)
-            total_bond_length += le
 
-        fin_arr = [total_bond_length] # TODO: try switching this to coords instead
+        fin_arr = [rdMolTransforms.GetBondLength(conf, start_ix, end_ix)] # TODO: try switching this to coords instead
 
         length = max(len(bond_lengths), 15)
 
         for i in range(length): fin_arr.append(bond_lengths[i])
         for i in range(15-length): fin_arr.append(0)
         
-        return total_bond_length, Tensor(fin_arr, dtype=torch.float16)
+        return Tensor(fin_arr, dtype=torch.float16)
