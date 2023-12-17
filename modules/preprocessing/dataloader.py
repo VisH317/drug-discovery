@@ -43,9 +43,13 @@ class Tox21(Dataset):
     def __len__(self):
         return len(self.data)
     
-    def __getitem__(self, idx: int):
+    def __getitem__(self, idx: int) -> Mole:
         return self.data[idx]
     
 
-def collate(mols: List[Mole]):
-    
+def tox21_collate(mols: List[Mole]):
+    graph: Tensor = torch.stack([mol.graph.x for mol in mols], 0)
+    top: Tensor = torch.stack([mol.top for mol in mols], 0)
+    features: List[List[float]] = [mol.features for mol in mols]
+
+    return graph, top, features

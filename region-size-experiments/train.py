@@ -1,7 +1,7 @@
-from .control import MolTransformer
-from torch import nn, Tensor
+from .moltransformer import MolTransformer
+from torch import nn, Tensor, optim
 from torch.utils.data import DataLoader, random_split
-from modules.preprocessing.dataloader import FEATURES, Tox21
+from modules.preprocessing.dataloader import FEATURES, Tox21, tox21_collate
 
 # CONFIG
 d_model = 32
@@ -16,10 +16,16 @@ def train(model: nn.Module, dataset: Tox21):
 
     # create data
     train_data, val_data = random_split(dataset, [0.7, 0.3])
-    train_loader = DataLoader(train_data, shuffle=True, batch_size=16)
-    val_loader = DataLoader(val_data, shuffle=True, batch_size=16)
+    train_loader = DataLoader(train_data, shuffle=True, batch_size=4, collate_fn=tox21_collate)
+    val_loader = DataLoader(val_data, shuffle=True, batch_size=1, collate_fn=tox21_collate)
 
-    for i, data
+    opt = optim.AdamW(model.parameters(), 3e-4)
+
+    for i, data in enumerate(train_loader):
+        graph, top, features = data
+
+        opt.zero_grad()
+        
     
     
 

@@ -31,11 +31,10 @@ class TopologicalAttention(nn.Module):
         Q: Tensor = self.Q(input)
         K: Tensor = self.K(input)
         V: Tensor = self.V(input)
-
-        total, top = self.topological.get_topological()
+        # dim: (d_attn, seq_len)
 
         QK = torch.matmul(Q, K.transpose(-2, -1)) / torch.sqrt(torch.Tensor(self.att_dim))
-        
+        # need to dim this
         score = F.softmax(QK + self.top(top))
 
         return torch.matmul(score, V)
@@ -46,8 +45,8 @@ class MultiHeadTopologicalAttention(nn.Module):
         self.heads = nn.ModuleList([TopologicalAttention(d_attn, d_model) for head in range(n_head)])
         self.O = nn.Linear(n_head * d_attn, d_model)
 
-    def forward(self, input: Tensor) -> Tensor:
-        outputs = [head(input) for head in self.heads]
+    def forward(self, input: Tensor, top: Tensor) -> Tensor:
+        outputs = [head(input, top) for head in self.heads]
         concated = torch.concat(outputs, dim=-1)
         return self.O(concated)
 
@@ -67,8 +66,8 @@ class Encoder(nn.Module):
         self.ff2 = nn.Linear(d_model * 4, d_model)
         self.ln2 = nn.LayerNorm(d_model)
 
-    def forward(self, input: Tensor, m, psi) -> Tensor:
-        attn_out = self.attn(input, m, psi)
+    def forward(self, input: Tensor, top: Tensor) -> Tensor:
+        attn_out = self.attn(input, top)
         res1 = attn_out + input
         out = self.ln1(res1)
         out = self.ff2(self.ff(out))
@@ -90,10 +89,10 @@ class MolTransformer(nn.Module):
 
         self.encoders = nn.ModuleList([Encoder(d_attn, d_model, n_heads) for enc in range(n_encoders)])
 
-    def forward(self, input: Datum) -> Tensor:
-        init = self.initmod(input.graph)
+    def forward(self, graph: Tensor, top: Tensor) -> Tensor:
+        init = self.initmod(graph)
         for encoder in self.encoders:
-            out = encoder(init, input.mol, input.psi)
+            out = encoder(init, top)
         
         return out
         
