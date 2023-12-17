@@ -30,7 +30,8 @@ class Topological():
     def __init__(self, d_attn: int = 32):
         self.d_attn = d_attn
 
-    def get_topological(self, m, psi, start_ix: int, end_ix: int) -> float:
+    def get_topological(self, m, start_ix: int, end_ix: int) -> float:
+        if start_ix == end_ix: return torch.zeros([16])
         path: Tuple[int] = GetShortestPath(m, start_ix, end_ix)
         # atom1_coords = m.GetConformer().GetAtomPosition(start_ix)
         # atom2_coords = m.GetConformer().GetAtomPosition(end_ix)
@@ -39,15 +40,14 @@ class Topological():
         bond_lengths = []
         conf = m.GetConformer()
 
-        for i in range(len(path)-1):
+        for i in range(len(path)):
             le = rdMolTransforms.GetBondLength(conf, i, i+1)
             bond_lengths.append(le)
 
         fin_arr = [rdMolTransforms.GetBondLength(conf, start_ix, end_ix)] # TODO: try switching this to coords instead
-
-        length = max(len(bond_lengths), 15)
+        length = min(len(bond_lengths), 15)
 
         for i in range(length): fin_arr.append(bond_lengths[i])
         for i in range(15-length): fin_arr.append(0)
         
-        return Tensor(fin_arr, dtype=torch.float16)
+        return torch.tensor(fin_arr, dtype=torch.float16)

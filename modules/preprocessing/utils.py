@@ -21,7 +21,7 @@ def get_atom_info(atom):
     return x
     
 
-def get_edge_info(bond, m, psi):
+def get_edge_info(bond, m):
 
     idx1, idx2 = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
     atom1_coords = m.GetConformer().GetAtomPosition(idx1)
@@ -73,16 +73,16 @@ def get_mol_info(mol):
         atoms.append(get_atom_info(atom))
         l+=1
 
-    print(l)
+    print("size: ", l)
     
     x = torch.tensor(atoms, dtype=torch.long).view(-1, 9)
 
-    psi = psi4.geometry(mol_to_xyz(mol))
+    # psi = psi4.geometry(mol_to_xyz(mol))
     # energy, wavefunction = psi4.energy("scf/cc-pvdz", return_wfn=True, molecule=psi)
     edge_indices, edge_attrs = [], []
 
     for bond in mol.GetBonds():
-        edge_idx, edge_attr = get_edge_info(bond, mol, psi)
+        edge_idx, edge_attr = get_edge_info(bond, mol)
         edge_indices += edge_idx
         edge_attrs += edge_attr
 
@@ -99,13 +99,18 @@ def get_mol_info(mol):
 
 def smiles_to_graph(smiles: str):
     mol = Chem.MolFromSmiles(smiles)
-    psi = smiles_to_psi4(smiles)
     mol = Chem.AddHs(mol)
+    success = True
+
+
     AllChem.EmbedMolecule(mol)
-    AllChem.MMFFOptimizeMolecule(mol)
+    try: 
+        AllChem.UFFOptimizeMolecule(mol,3000)
+    except: return None, None, False
+    
     x, edge_index, edge_attr = get_mol_info(mol)
 
-    return Data(x=x, edge_index=edge_index, edge_attr=edge_attr, smiles=smiles), mol, psi
+    return Data(x=x, edge_index=edge_index, edge_attr=edge_attr, smiles=smiles), mol, True
     # d.edge_attrs()
 
 

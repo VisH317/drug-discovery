@@ -7,12 +7,38 @@ from torch import Tensor
 from torch.utils.data import Dataset
 from.utils import smiles_to_graph
 from ..attention.topological import Topological
+import pickle
 
 
 FEATURES = ["NR-AR", "NR-AR-LBD", "NR-Aromatase", "NR-ER", "NR-ER-LBD", "SR-ARE", "SR-ATADS", "SR-HSE", "SR-MMP", "SR-p53"]
 
 
 Mole = namedtuple("Mole", ['graph', 'top', 'features'])
+
+def parse_data():
+    df = pd.read_csv("./data/tox21.csv")
+    data: List[Mole] = []
+
+    for ix in range(len(df)): 
+        graph, mol, success = smiles_to_graph(df["smiles"][ix])
+        if not success: continue
+        top = torch.empty((graph.x.size()[0], graph.x.size()[0], 16))
+        for atom1 in mol.GetAtoms():
+            for atom2 in mol.GetAtoms():
+                x, y = atom1.GetIdx(), atom2.GetIdx()
+                vec1 = Topological().get_topological(mol, x, y)
+                vec2 = Topological().get_topological(mol, y, x)
+                top[x][y] = vec1
+                top[y][x] = vec2
+
+        features: List[float] = []
+        for feature in FEATURES:
+            try: features.append(df[feature][ix])
+            except: features.append(-1)
+        data.append(Mole(graph, top, features))
+    
+    with open("./data/tox21_parsed.pkl", "wb") as pkl:
+        pickle.dump(data, pkl)
 
 class Tox21(Dataset):
     def __init__(self):
@@ -21,10 +47,9 @@ class Tox21(Dataset):
         df = pd.read_csv("./data/tox21.csv")
         self.data: List[Mole] = []
 
-        for ix in range(1): 
-            print("self.dtata: ", self.data) # change this
-            graph, mol, psi = smiles_to_graph(df["smiles"][10])
-            top = torch.empty((graph.x.size()[1], graph.x.size()[1], 16))
+        for ix in range(len(df)): 
+            graph, mol, psi = smiles_to_graph(df["smiles"][ix])
+            top = torch.empty((graph.x.size()[0], graph.x.size()[0], 16))
             for atom1 in mol.GetAtoms():
                 for atom2 in mol.GetAtoms():
                     x, y = atom1.GetIdx(), atom2.GetIdx()
