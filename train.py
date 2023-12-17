@@ -29,4 +29,4 @@ def train(model: nn.Module, dataset: Tox21):
 
 model = MolTransformer(32, 2, 8, 16, 11, False)
 item = Tox21()[0]
-model.forward(item.graph, item.top)
+print(item)

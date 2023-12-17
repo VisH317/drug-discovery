@@ -1,7 +1,7 @@
 from torch_geometric.data import Data
 import torch
 from rdkit import Chem
-from rdkit.Chem import AllChem
+from rdkit.Chem import AllChem, rdMolTransforms
 from .data import x_map, e_map
 import psi4
 
@@ -17,7 +17,10 @@ def get_atom_info(atom):
     x.append(x_map['hybridization'].index(str(atom.GetHybridization())))
     x.append(x_map['is_aromatic'].index(atom.GetIsAromatic()))
     x.append(x_map['is_in_ring'].index(atom.IsInRing()))
+
+    return x
     
+
 def get_edge_info(bond, m):
 
     idx1, idx2 = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
@@ -28,19 +31,26 @@ def get_edge_info(bond, m):
     psi_bond = psi4.geometry(
         f"""
         2
-        Atom1 {atom1_coords.x} {atom1_coords.y} {atom1_coords.z}
-        Atom2 {atom2_coords.x} {atom2_coords.y} {atom2_coords.z}
+        {m.GetAtomWithIdx(idx1).GetSymbol()} {atom1_coords.x} {atom1_coords.y} {atom1_coords.z}
+        {m.GetAtomWithIdx(idx1).GetSymbol()} {atom2_coords.x} {atom2_coords.y} {atom2_coords.z}
         """
     )
+
+    # psi4.optimize('scf/cc-pvdz', molecule=psi_bond)
 
     e = []
     e.append(e_map['bond_type'].index(str(bond.GetBondType())))
     e.append(e_map['stereo'].index(str(bond.GetStereo())))
     e.append(e_map['is_conjugated'].index(bond.GetIsConjugated()))
+    e.append(rdMolTransforms.GetBondLength(m.GetConformer(), idx1, idx2))
 
-    bond_length = psi_bond.bond_length(0, 1) # radial representation of the quantum number
+    # bond_length = psi_bond.bond_length(0, 1) # radial representation of the quantum number
     # TODO: angular representation requires a custom attention layer, I'll set this up later
-    energy, wavefunction = psi4.energy("scf/cc-pvdz")
+    psi4.set_options({'reference': 'uhf'})
+    energy, wavefunction = psi4.energy("scf/cc-pvdz", return_wfn=True, molecule=psi_bond)
+    # print("energy: ", energy)
+    # print(wavefunction.__dict__)
+    # exit()
     # bond_order = wavefunction.bond_order(0, 1) # bond type and strength, based on quantum calculations, but rdkit provides this info already
     alpha, beta = wavefunction.nalpha(), wavefunction.nbeta()
     # oe_a, oe_b = wavefunction.epsilon_a_subset("A0"), wavefunction.epsilon_b_subset("AO") # we don't need these, these are eigenvalues - calculated on the hamiltonian to represent different energy states of the molecule
@@ -48,7 +58,6 @@ def get_edge_info(bond, m):
     # nmr = psi4.nmr_shielding(psi_bond, atoms=[0,1]) # magnetic info, important because its one of the quantum numbers that aren't considered in the above (radial, angular, magnetic)
     # TODO: ADD IN NMR LATER for magnetic information (it returns a 3x3 tensor per nucleus)
 
-    e.append(bond_length)
     e.append(energy)
     e.append(alpha)
     e.append(beta)
@@ -58,9 +67,12 @@ def get_edge_info(bond, m):
 
 def get_mol_info(mol):
     atoms = []
-
+    l = 0
     for atom in mol.GetAtoms():
         atoms.append(get_atom_info(atom))
+        l+=1
+
+    print(l)
     
     x = torch.tensor(atoms, dtype=torch.long).view(-1, 9)
 
@@ -109,4 +121,8 @@ def smiles_to_psi4(smiles: str):
     mol = Chem.AddHs(mol)
     AllChem.EmbedMolecule(mol)
     AllChem.MMFFOptimizeMolecule(mol)
-    return psi4.geometry(mol_to_xyz(mol))
+
+    psi = psi4.geometry(mol_to_xyz(mol))
+    # psi4.optimize('scf/cc-pvdz', molecule=psi)
+
+    return psi

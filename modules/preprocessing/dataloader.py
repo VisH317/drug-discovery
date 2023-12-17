@@ -21,8 +21,10 @@ class Tox21(Dataset):
         df = pd.read_csv("./data/tox21.csv")
         self.data: List[Mole] = []
 
-        for ix in len(df):
-            graph, mol, psi = smiles_to_graph(df["smiles"][ix])
+        for ix in range(1): 
+            print("self.dtata: ", self.data) # change this
+            graph, mol, psi = smiles_to_graph(df["smiles"][10])
+            break
             top = torch.empty((graph.x.size()[1], graph.x.size()[1], 16))
             for atom1 in mol.GetAtoms():
                 for atom2 in mol.GetAtoms():
