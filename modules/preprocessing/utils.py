@@ -72,8 +72,6 @@ def get_mol_info(mol):
     for atom in mol.GetAtoms():
         atoms.append(get_atom_info(atom))
         l+=1
-
-    print("size: ", l)
     
     x = torch.tensor(atoms, dtype=torch.long).view(-1, 9)
 

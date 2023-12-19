@@ -8,6 +8,7 @@ from torch.utils.data import Dataset
 from.utils import smiles_to_graph
 from ..attention.topological import Topological
 import pickle
+from tqdm import tqdm
 
 
 FEATURES = ["NR-AR", "NR-AR-LBD", "NR-Aromatase", "NR-ER", "NR-ER-LBD", "SR-ARE", "SR-ATADS", "SR-HSE", "SR-MMP", "SR-p53"]
@@ -19,7 +20,7 @@ def parse_data():
     df = pd.read_csv("./data/tox21.csv")
     data: List[Mole] = []
 
-    for ix in range(len(df)): 
+    for ix in tqdm(range(len(df)), total=len(df), desc="doing data stuff", ): 
         graph, mol, success = smiles_to_graph(df["smiles"][ix])
         if not success: continue
         top = torch.empty((graph.x.size()[0], graph.x.size()[0], 16))

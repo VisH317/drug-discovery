@@ -40,8 +40,8 @@ class Topological():
         bond_lengths = []
         conf = m.GetConformer()
 
-        for i in range(len(path)):
-            le = rdMolTransforms.GetBondLength(conf, i, i+1)
+        for i in range(len(path)-1):
+            le = rdMolTransforms.GetBondLength(conf, path[i], path[i+1])
             bond_lengths.append(le)
 
         fin_arr = [rdMolTransforms.GetBondLength(conf, start_ix, end_ix)] # TODO: try switching this to coords instead
