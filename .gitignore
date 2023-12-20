@@ -4,4 +4,4 @@ __pycache__
 **/__pycache__
 *.dat
 *.clean
-**/*.pkl
+# .pkl
