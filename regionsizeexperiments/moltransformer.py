@@ -1,4 +1,6 @@
 # control version
+import os
+import configparser
 import rdkit
 from typing import Any
 from collections import namedtuple
@@ -87,6 +89,22 @@ class MolTransformer(nn.Module):
         )
 
         self.encoders = nn.ModuleList([Encoder(d_attn, d_model, n_heads) for enc in range(n_encoders)])
+
+    @staticmethod
+    def from_config(file_path: str):
+        config = configparser.ConfigParser()
+        config.read(os.path.join(os.getcwd(), file_path))
+        
+        d_model = config.get("transformer", "d_model")
+        n_encoders = config.get("transformer", "n_encoders")
+        n_heads = config.get("transformer", "n_heads")
+        d_attn = config.get("transformer", "d_attn")
+        d_embed = config.get("transformer", "d_embed")
+        use_pre = config.get("transformer", "use_pre")
+
+        return MolTransformer(d_model, n_encoders, n_heads, d_attn, d_embed, use_pre)
+        
+
 
     def forward(self, graph: Tensor, top: Tensor) -> Tensor:
         init = self.initmod(graph)

@@ -1,4 +1,6 @@
 import pandas as pd
+import os
+import pickle
 from torch_geometric.data import Data
 from typing import Any, List, Dict
 import torch
@@ -33,8 +35,11 @@ def parse_data():
                 top[y][x] = vec2
 
         features: List[float] = []
+        active_features: list[float] = []
         for feature in FEATURES:
-            try: features.append(df[feature][ix])
+            try: 
+                features.append(int(df[feature][ix]))
+                active_features.append(ix)
             except: features.append(-1)
         data.append(Mole(graph, top, features))
     
@@ -42,29 +47,13 @@ def parse_data():
         pickle.dump(data, pkl)
 
 class Tox21(Dataset):
-    def __init__(self):
+    def __init__(self, file: str):
         super().__init__()
+        self.file_path = file
+        with open(os.path.join(os.getcwd(), file)) as f:
+            self.data = pickle.load(f)
 
-        df = pd.read_csv("./data/tox21.csv")
-        self.data: List[Mole] = []
 
-        for ix in range(len(df)): 
-            graph, mol, psi = smiles_to_graph(df["smiles"][ix])
-            top = torch.empty((graph.x.size()[0], graph.x.size()[0], 16))
-            for atom1 in mol.GetAtoms():
-                for atom2 in mol.GetAtoms():
-                    x, y = atom1.GetIdx(), atom2.GetIdx()
-                    vec1 = Topological().get_topological(mol, psi, x, y)
-                    vec2 = Topological().get_topological(mol, psi, y, x)
-                    top[x][y] = vec1
-                    top[y][x] = vec2
-
-            features: List[float] = []
-            for feature in FEATURES:
-                try: features.append(df[feature][ix])
-                except: features.append(-1)
-            self.data.append(Mole(graph, top, features))
-        
     def __len__(self):
         return len(self.data)
     

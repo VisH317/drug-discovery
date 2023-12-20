@@ -12,7 +12,7 @@ _PAMNET:_ Current state of the art, does not use local information that much, an
   - proff - Elembert - preprocessing was pre-made cluster based instead of dynamic
 
 **Idea Progression to Test:**
-- *Current* - getting the data cleaning to function
+- *Current* - getting the data cleaning to function - DONE
 - Getting the transformer to function
 - Testing different local region size: one with just bond lengths, maybe adding bond angles?
 - Adding in global dependencies - molecular energy, orbital energies, or estimating them ourselves?
