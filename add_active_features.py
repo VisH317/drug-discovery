@@ -15,4 +15,4 @@ with open("./data/tox21_parsed.pkl", "rb") as f:
         new_dt.append(Mole(mol.graph, mol.top, mol.features, active_features))
         
     with open("./data/tox21_parsed_updated.pkl", "wb") as f:
-        pickle.dump(dt, f)
+        pickle.dump(new_dt, f)

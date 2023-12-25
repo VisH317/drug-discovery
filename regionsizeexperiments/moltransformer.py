@@ -19,37 +19,44 @@ Datum = namedtuple("Datum", ['graph', 'mol', 'psi', 'smiles'])
 class TopologicalAttention(nn.Module):
     def __init__(self, d_attn: int, d_model: int):
         super().__init__()
+        self.d_attn, self.d_model = d_attn, d_model
+        self.softmax = nn.Softmax(-1)
 
-        self.topological = Topological(d_attn)
-        self.top = nn.Linear(16, 1)
-
-        self.Q = nn.Linear(d_model, d_attn)
-        self.K = nn.Linear(d_model, d_attn)
-        self.V = nn.Linear(d_model, d_attn)
-
-    def forward(self, input: Tensor, top: Tensor):
-        # dim: batch, seq_len, d_model
-        Q: Tensor = self.Q(input)
-        K: Tensor = self.K(input)
-        V: Tensor = self.V(input)
-        # dim: (d_attn, seq_len)
-
-        QK = torch.matmul(Q, K.transpose(-2, -1)) / torch.sqrt(torch.Tensor(self.att_dim))
+    def forward(self, Q: Tensor, K: Tensor, V: Tensor, top: Tensor):
+        QK = torch.matmul(Q, K.transpose(-2, -1)) / (self.d_attn ** 0.5)
         # need to dim this
-        score = F.softmax(QK + self.top(top))
+        score = self.softmax(QK + top)
 
         return torch.matmul(score, V)
 
 class MultiHeadTopologicalAttention(nn.Module):
     def __init__(self, n_head: int, d_attn: int, d_model: int):
         super().__init__()
-        self.heads = nn.ModuleList([TopologicalAttention(d_attn, d_model) for head in range(n_head)])
-        self.O = nn.Linear(n_head * d_attn, d_model)
+        self.att = TopologicalAttention(d_attn, d_model)
+
+        self.n_head = n_head
+        self.d_attn = d_attn
+
+        self.top = nn.Linear(16, 1)
+
+        self.w_O = nn.Linear(n_head * d_attn, d_model)
+
+        self.w_Q = nn.Linear(d_model, d_attn * n_head)
+        self.w_K = nn.Linear(d_model, d_attn * n_head)
+        self.w_V = nn.Linear(d_model, d_attn * n_head)
 
     def forward(self, input: Tensor, top: Tensor) -> Tensor:
-        outputs = [head(input, top) for head in self.heads]
-        concated = torch.concat(outputs, dim=-1)
-        return self.O(concated)
+        batch_size, seq_len, d_attn = input.size()
+
+        top_out = self.top(top)
+        top_out = top_out.squeeze().unsqueeze(1).repeat(1, self.n_head, 1, 1)
+
+        Q, K, V = self.w_Q(input).reshape(batch_size, seq_len, self.n_head, self.d_attn).permute(0, 2, 1, 3), \
+            self.w_K(input).reshape(batch_size, seq_len, self.n_head, self.d_attn).permute(0, 2, 1, 3), \
+            self.w_V(input).reshape(batch_size, seq_len, self.n_head, self.d_attn).permute(0, 2, 1, 3)
+        
+        O = self.att(Q, K, V, top_out).permute(0, 2, 1, 3).reshape(batch_size, seq_len, self.n_head * self.d_attn) # (batch_size, n_head, seq_len, d_model)
+        return self.w_O(O)
 
 class Encoder(nn.Module):
     def __init__(self, d_attn: int = 16, d_model: int = 32, n_head: int = 8):
@@ -95,12 +102,12 @@ class MolTransformer(nn.Module):
         config = configparser.ConfigParser()
         config.read(os.path.join(os.getcwd(), file_path))
         
-        d_model = config.get("transformer", "d_model")
-        n_encoders = config.get("transformer", "n_encoders")
-        n_heads = config.get("transformer", "n_heads")
-        d_attn = config.get("transformer", "d_attn")
-        d_embed = config.get("transformer", "d_embed")
-        use_pre = config.get("transformer", "use_pre")
+        d_model = int(config.get("transformer", "d_model"))
+        n_encoders = int(config.get("transformer", "n_encoders"))
+        n_heads = int(config.get("transformer", "n_heads"))
+        d_attn = int(config.get("transformer", "d_attn"))
+        d_embed = int(config.get("transformer", "d_embed"))
+        use_pre = int(config.get("transformer", "use_pre"))
 
         return MolTransformer(d_model, n_encoders, n_heads, d_attn, d_embed, use_pre)
         
@@ -110,7 +117,6 @@ class MolTransformer(nn.Module):
         init = self.initmod(graph)
         for encoder in self.encoders:
             out = encoder(init, top)
-        
         return out
         
     
