@@ -24,3 +24,11 @@ _PAMNET:_ Current state of the art, does not use local information that much, an
 - Trying pretraining tasks?
   - predicting a part of the molecule?
   - predicting which items would bond
+
+
+**The new idea**
+- wavefunction data augmented attention
+- Add info to Q + K matrices
+  - radial function estimator and spherical harmonic estimator
+  - adds along with globals => gives a better output?
+- Plus local details
