@@ -31,16 +31,18 @@ def train(cfg_path: str = CFG_PATH, dtype: torch.dtype = torch.float32, cuda: bo
     n_epochs = int(config.get("training", "n_epochs"))
     val_size = int(config.get("training", "val_size"))
     val_step = int(config.get("training", "val_step"))
+    lr = float(config.get("training", "lr"))
+    grad_clip = float(config.get("training", "grad_clip"))
 
     losses = []
     val_losses = []
 
     dataset = Tox21("data/tox21_parsed.pkl")
-
-    opt = optim.AdamW(model.parameters(), 3e-4)
+    print(lr)
+    opt = optim.AdamW(model.parameters(), lr)
     scheduler = optim.lr_scheduler.ExponentialLR(optimizer=opt, gamma=0.9)
 
-    loss_fn = nn.MSELoss().to(dtype=dtype) # test with BCE later as well
+    loss_fn = nn.CrossEntropyLoss().to(dtype=dtype) # test with BCE later as well
     if cuda: loss_fn.cuda()
 
     for epoch in range(n_epochs):
@@ -53,24 +55,34 @@ def train(cfg_path: str = CFG_PATH, dtype: torch.dtype = torch.float32, cuda: bo
         epoch_losses = []
         epoch_val = []
 
-        for i, data in tqdm(enumerate(train_loader), desc=f"Epoch {epoch} Loss: {epoch_losses[-1] if len(epoch_losses) > 0 else 0}", total=len(train_loader)):
+        tr = tqdm(enumerate(train_loader), desc=f"Epoch {epoch} Loss: {epoch_losses[-1] if len(epoch_losses) > 0 else 0}", total=len(train_loader))
+
+        for i, data in tr:
             graph, top, feature_idx, feature = data
 
             opt.zero_grad()
 
-            out = model(graph.to(dtype=dtype) if not cuda else graph.to(dtype=dtype).cuda(), top.to(dtype=dtype) if not cuda else top.to(dtype=dtype).cuda()).reshape(batch_size, d_model * MAX_LEN).to(dtype=dtype)
+            out = model(graph.to(dtype=dtype) if not cuda else graph.to(dtype=dtype).cuda(), top.to(dtype=dtype) if not cuda else top.to(dtype=dtype).cuda()).reshape(graph.size()[0], d_model * MAX_LEN).to(dtype=dtype)
 
-            loss = 0
+            loss = torch.zeros([1], device=torch.device("cuda" if cuda else "cpu"))
 
             for ix in range(out.size()[0]):
-                final = classifiers[feature_idx[ix]](out)[ix, 0].unsqueeze(0)
+                final = classifiers[feature_idx[ix]](out)[ix]
                 if cuda: final.cuda()
-                features = torch.tensor([feature[ix]], dtype=dtype, device=torch.device("cuda" if cuda else "cpu"))
+                features = torch.tensor([feature[ix], 0 if feature[ix] == 1 else 1], dtype=dtype, device=torch.device("cuda" if cuda else "cpu"))
+                # print(features, final)
                 
-                loss += loss_fn(final, features)
-            
-            epoch_losses.append(loss)
+                cur_loss = loss_fn(final, features)
+                # print("final: ", out, ", features: ", features)
+                loss += cur_loss
+
+            tr.set_description(f"Epoch {epoch} Loss: {str(epoch_losses[-1] if len(epoch_losses) > 0 else 0)}, Valid: {str(epoch_val[-1] if len(epoch_val) > 0 else 0)}")
+            tr.refresh()
+            print(loss)
+            epoch_losses.append(loss.item())
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
+
             opt.step()
 
             if i % val_step == 0:
@@ -93,11 +105,10 @@ def train(cfg_path: str = CFG_PATH, dtype: torch.dtype = torch.float32, cuda: bo
 
                         loss += loss_fn(final, features)
                     
-                    val_losses.append(loss)
- 
-
+                    epoch_val.append(loss.item())
         
-        losses.append(epoch_losses)
+        losses.extend(epoch_losses)
+        val_losses.extend(epoch_val)
         scheduler.step()    
 
     return model, losses

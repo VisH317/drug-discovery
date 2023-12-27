@@ -79,7 +79,7 @@ class Encoder(nn.Module):
         res1 = attn_out + input
         out = self.ln1(res1)
         out = self.ff2(self.ff(out))
-        out = out + res1
+        out = F.silu(out + res1)
         return self.ln2(out)
     
 
@@ -94,6 +94,8 @@ class MolTransformer(nn.Module):
             nn.Linear(d_embed, d_model),
             nn.LayerNorm(d_model)
         )
+
+        # self.bn = nn.BatchNorm2d(d_model) batchnorm for the topological encodings?
 
         self.encoders = nn.ModuleList([Encoder(d_attn, d_model, n_heads) for enc in range(n_encoders)])
 
@@ -114,6 +116,7 @@ class MolTransformer(nn.Module):
 
 
     def forward(self, graph: Tensor, top: Tensor) -> Tensor:
+        
         init = self.initmod(graph)
         for encoder in self.encoders:
             out = encoder(init, top)
