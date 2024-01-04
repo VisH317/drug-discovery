@@ -32,3 +32,60 @@ _PAMNET:_ Current state of the art, does not use local information that much, an
   - radial function estimator and spherical harmonic estimator
   - adds along with globals => gives a better output?
 - Plus local details
+
+**My Main Idea**
+- wavefunction estimation for substructures
+- hierarchical attention
+
+**Another Idea**
+- estimating a LCAO
+- generate coefficients based on wavefunction attention
+
+
+**How to make wavefunction-based embeddings**
+- first - generate radial and spherical basis sets
+- for radial and spherical - generate coefficients for each basis
+  - add them up => gives us the wavefunction approximation
+- for substructures - generate coefficients for LCAO
+- how to integrate the wavefunction or molecular wavefunction into attention
+  - first comparison - basic info like atomic number, mass, hybridization
+  - + topological - adds a basic positioning system to understand relationships
+  - + radial wavefunction - adds atomic distance estimations
+  - + spherical wavefunction - 
+  - the wavefunction representation will be a list of coefficients
+    - when attending to two different atoms, they 
+
+
+**The final idea**
+- two main aspects: substructures and wavefunction estimations
+- the wavefunction estimation
+  - coefficients of radial and spherical bases
+  - will be LCAO-ed together for substructures
+- substructure searching
+  - one layer - will attend to atom-level relationships
+  - other layers - detect repeating substructures just like JT-VAE
+    - create a wavefunction-based embedding - LCAO estimation based on the coefficient estimation from each atom
+      - done through local attention =>
+
+
+**The actual final idea**
+- Substructure
+  - each substructure is detected
+  - local attention is done within the substructure - spherical + radial bessel function analysis
+  - we get a substructure embedding
+- The ACTUAL THING
+  - attention is done, but substructure embeddings are inserted in
+  - also some feedback loop to update the substructure embeddings based on the attention value?
+- Things
+  - substructure detection
+  - substructure analysis - message passing + LCAO-inspired aggregation or... a TRANSFORMER!
+  - then: global - attach a substructure embedding during attention
+    - used to compute relations
+    - add the substructure embedding to each atom when relevant
+      - have a vector v_nosub for when not in substructure
+    - keep the positional attention embedding
+      - need to fine tune this with some sort of positioning map
+    - create the relations and compute attention
+      - when atoms in same substructure - no effect
+      - atoms in different substructure - add to the substructure embedding slightly
+        - this will most likely be a simple linear layer that takes in distance + relative properties
